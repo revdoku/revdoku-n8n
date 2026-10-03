@@ -1,0 +1,61 @@
+{
+  "name": "n8n-nodes-revdoku",
+  "version": "1.0.0",
+  "description": "Revdoku email inboxes and private file storage for n8n.",
+  "license": "MIT",
+  "author": {
+    "name": "Revdoku",
+    "email": "support@revdoku.com"
+  },
+  "homepage": "https://github.com/revdoku/revdoku-n8n#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/revdoku/revdoku-n8n.git"
+  },
+  "keywords": [
+    "n8n-community-node-package",
+    "revdoku",
+    "email",
+    "storage"
+  ],
+  "engines": {
+    "node": ">=22.16"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "templates",
+    "USAGE.md",
+    "CONTRIBUTING.md"
+  ],
+  "scripts": {
+    "build": "n8n-node build",
+    "test": "npm run build && node --test test/*.test.cjs",
+    "lint": "n8n-node lint",
+    "prepack": "npm run build"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/RevdokuApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Revdoku/Revdoku.node.js",
+      "dist/nodes/Revdoku/RevdokuTrigger.node.js"
+    ]
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "0.50.4",
+    "@types/node": "^22.0.0",
+    "n8n-workflow": "2.16.0",
+    "typescript": "~5.9.3"
+  },
+  "bugs": {
+    "url": "https://github.com/revdoku/revdoku-n8n/issues"
+  }
+}

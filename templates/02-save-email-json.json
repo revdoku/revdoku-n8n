@@ -1,0 +1,121 @@
+{
+  "name": "Revdoku - Save email JSON and mark it read",
+  "nodes": [
+    {
+      "id": "new-email",
+      "name": "New email",
+      "type": "n8n-nodes-revdoku.revdokuTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "bucketId": "REPLACE_WITH_SOURCE_BUCKET_ID",
+        "includeExisting": false,
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "get-email",
+      "name": "Get email",
+      "type": "n8n-nodes-revdoku.revdoku",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "resource": "email",
+        "operation": "get",
+        "bucketId": "={{ $('New email').params.bucketId }}",
+        "emailId": "={{ $json.id }}"
+      }
+    },
+    {
+      "id": "save-email-json",
+      "name": "Save email JSON",
+      "type": "n8n-nodes-revdoku.revdoku",
+      "typeVersion": 1,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "bucketId": "REPLACE_WITH_DESTINATION_BUCKET_ID",
+        "uploadInput": "text",
+        "text": "={{ JSON.stringify($json.email, null, 2) }}",
+        "path": "={{ 'email-json/' + $json.email.id + '.json' }}",
+        "contentType": "application/json",
+        "reason": "Save received email JSON through n8n"
+      }
+    },
+    {
+      "id": "mark-email-read",
+      "name": "Mark email read",
+      "type": "n8n-nodes-revdoku.revdoku",
+      "typeVersion": 1,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "resource": "email",
+        "operation": "update",
+        "bucketId": "={{ $('New email').params.bucketId }}",
+        "emailId": "={{ $('New email').item.json.id }}",
+        "read": true,
+        "reason": "Saved email JSON through the n8n workflow"
+      }
+    }
+  ],
+  "connections": {
+    "New email": {
+      "main": [
+        [
+          {
+            "node": "Get email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get email": {
+      "main": [
+        [
+          {
+            "node": "Save email JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save email JSON": {
+      "main": [
+        [
+          {
+            "node": "Mark email read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}

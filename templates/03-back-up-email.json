@@ -1,0 +1,93 @@
+{
+  "name": "Revdoku - Back up original emails as EML files",
+  "nodes": [
+    {
+      "id": "new-email",
+      "name": "New email",
+      "type": "n8n-nodes-revdoku.revdokuTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "bucketId": "REPLACE_WITH_SOURCE_BUCKET_ID",
+        "includeExisting": false,
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "download-original",
+      "name": "Download original",
+      "type": "n8n-nodes-revdoku.revdoku",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "resource": "email",
+        "operation": "downloadOriginal",
+        "bucketId": "={{ $('New email').params.bucketId }}",
+        "emailId": "={{ $json.id }}",
+        "outputBinaryField": "data"
+      }
+    },
+    {
+      "id": "save-eml-file",
+      "name": "Save EML file",
+      "type": "n8n-nodes-revdoku.revdoku",
+      "typeVersion": 1,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "bucketId": "REPLACE_WITH_DESTINATION_BUCKET_ID",
+        "uploadInput": "binary",
+        "inputBinaryField": "data",
+        "path": "={{ 'email-backups/' + $('New email').item.json.id + '.eml' }}",
+        "contentType": "message/rfc822",
+        "reason": "Back up the original email through n8n"
+      }
+    }
+  ],
+  "connections": {
+    "New email": {
+      "main": [
+        [
+          {
+            "node": "Download original",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download original": {
+      "main": [
+        [
+          {
+            "node": "Save EML file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}
