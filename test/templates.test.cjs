@@ -52,9 +52,9 @@ async function executeTemplate(filename, options = {}) {
   );
   for (const node of definition.nodes) {
     for (const [name, value] of Object.entries(node.parameters)) {
-      if (value === "REPLACE_WITH_SOURCE_BUCKET_ID")
+      if (value === "REPLACE_WITH_SOURCE_MAILBOX_ID")
         node.parameters[name] = "bkt_source";
-      if (value === "REPLACE_WITH_DESTINATION_BUCKET_ID")
+      if (value === "REPLACE_WITH_DESTINATION_MAILBOX_ID")
         node.parameters[name] = "bkt_destination";
     }
     if (node.type.startsWith("n8n-nodes-revdoku"))
@@ -114,7 +114,7 @@ async function executeTemplate(filename, options = {}) {
       getCredentials: async () => ({
         apiKey: "fixture-key",
         accountId:
-          node.parameters.bucketId === "bkt_destination"
+          node.parameters.mailboxId === "bkt_destination"
             ? "acct_destination"
             : "acct_source",
       }),
@@ -132,13 +132,13 @@ async function executeTemplate(filename, options = {}) {
               : request.body.account_id;
           assert.equal(
             account,
-            node.parameters.bucketId === "bkt_destination"
+            node.parameters.mailboxId === "bkt_destination"
               ? "acct_destination"
               : "acct_source",
           );
-          if (endpoint === "/v1/buckets" && request.method === "POST") {
+          if (endpoint === "/v1/mailboxes" && request.method === "POST") {
             return success({
-              bucket: {
+              mailbox: {
                 id: "bkt_created",
                 email: { address: "created@revdokumail.com" },
               },
@@ -153,7 +153,7 @@ async function executeTemplate(filename, options = {}) {
           }
           const match = endpoint.match(/\/emails\/(eml_[^/]+)(\/raw)?$/);
           if (match) {
-            assert.ok(endpoint.startsWith("/v1/buckets/bkt_source/"), endpoint);
+            assert.ok(endpoint.startsWith("/v1/mailboxes/bkt_source/"), endpoint);
             const email = emails.find((item) => item.id === match[1]);
             assert.ok(email, endpoint);
             if (request.method === "PATCH") {
@@ -307,10 +307,10 @@ test("three importable workflows have connected nodes, supported operations and 
   }
 });
 
-test("create workflow uploads into the bucket returned by creation", async () => {
+test("create workflow uploads into the mailbox returned by creation", async () => {
   const { saved } = await executeTemplate(templates[0]);
   assert.equal(saved.length, 1);
-  assert.equal(saved[0].bucket_id, "bkt_created");
+  assert.equal(saved[0].mailbox_id, "bkt_created");
   assert.equal(saved[0].path, "welcome.txt");
 });
 
@@ -323,7 +323,7 @@ test("JSON workflow preserves null bodies and each email ID across all linked it
   assert.ok(
     saved.every(
       (item) =>
-        item.bucket_id === "bkt_destination" &&
+        item.mailbox_id === "bkt_destination" &&
         item.account_id === "acct_destination",
     ),
   );

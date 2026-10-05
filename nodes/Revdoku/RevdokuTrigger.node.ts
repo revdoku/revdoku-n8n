@@ -17,7 +17,7 @@ export class RevdokuTrigger implements INodeType {
     group: ["trigger"],
     version: 1,
     subtitle: "New Email",
-    description: "Poll for new emails in a Revdoku inbox",
+    description: "Poll for new emails in a Revdoku mailbox",
     defaults: { name: "Revdoku Trigger" },
     inputs: [],
     outputs: [NodeConnectionTypes.Main],
@@ -25,8 +25,8 @@ export class RevdokuTrigger implements INodeType {
     credentials: [{ name: "revdokuApi", required: true }],
     properties: [
       {
-        displayName: "Bucket ID",
-        name: "bucketId",
+        displayName: "Mailbox ID",
+        name: "mailboxId",
         type: "string",
         default: "",
         required: true,
@@ -43,8 +43,8 @@ export class RevdokuTrigger implements INodeType {
   };
 
   async poll(this: IPollFunctions): Promise<INodeExecutionData[][] | null> {
-    const bucketId = this.getNodeParameter("bucketId") as string;
-    const path = `/buckets/${encodeURIComponent(bucketId)}/emails`;
+    const mailboxId = this.getNodeParameter("mailboxId") as string;
+    const path = `/mailboxes/${encodeURIComponent(mailboxId)}/emails`;
     if (this.getMode() === "manual") {
       const data = await request.call(this, "GET", path, {
         limit: 1,
@@ -58,7 +58,7 @@ export class RevdokuTrigger implements INodeType {
       this.getNode().credentials?.revdokuApi?.id,
       createHash("sha256").update(String(credentials.apiKey)).digest("hex"),
       credentials.accountId || "",
-      bucketId,
+      mailboxId,
     ]);
     const state = this.getWorkflowStaticData("node");
     let cursor =

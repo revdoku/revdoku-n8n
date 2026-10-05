@@ -1,0 +1,82 @@
+{
+  "name": "Revdoku - Create an mailbox with a welcome file",
+  "nodes": [
+    {
+      "id": "manual-start",
+      "name": "Run manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "create-mailbox",
+      "name": "Create mailbox",
+      "type": "n8n-nodes-revdoku.revdoku",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "resource": "mailbox",
+        "operation": "create",
+        "emailUsername": "workflow-mailbox",
+        "reason": "Create mailbox from the n8n example"
+      }
+    },
+    {
+      "id": "save-welcome-file",
+      "name": "Save welcome file",
+      "type": "n8n-nodes-revdoku.revdoku",
+      "typeVersion": 1,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "mailboxId": "={{ $json.mailbox.id }}",
+        "uploadInput": "text",
+        "text": "This mailbox was created by the n8n example.",
+        "path": "welcome.txt",
+        "contentType": "text/plain",
+        "reason": "Save the mailbox welcome file"
+      }
+    }
+  ],
+  "connections": {
+    "Run manually": {
+      "main": [
+        [
+          {
+            "node": "Create mailbox",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create mailbox": {
+      "main": [
+        [
+          {
+            "node": "Save welcome file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}

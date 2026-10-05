@@ -11,7 +11,7 @@
         300
       ],
       "parameters": {
-        "bucketId": "REPLACE_WITH_SOURCE_BUCKET_ID",
+        "mailboxId": "REPLACE_WITH_SOURCE_MAILBOX_ID",
         "includeExisting": false,
         "pollTimes": {
           "item": [
@@ -34,7 +34,7 @@
       "parameters": {
         "resource": "email",
         "operation": "downloadOriginal",
-        "bucketId": "={{ $('New email').params.bucketId }}",
+        "mailboxId": "={{ $('New email').params.mailboxId }}",
         "emailId": "={{ $json.id }}",
         "outputBinaryField": "data"
       }
@@ -51,7 +51,7 @@
       "parameters": {
         "resource": "file",
         "operation": "upload",
-        "bucketId": "REPLACE_WITH_DESTINATION_BUCKET_ID",
+        "mailboxId": "REPLACE_WITH_DESTINATION_MAILBOX_ID",
         "uploadInput": "binary",
         "inputBinaryField": "data",
         "path": "={{ 'email-backups/' + $('New email').item.json.id + '.eml' }}",

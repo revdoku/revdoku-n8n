@@ -44,29 +44,27 @@ export class Revdoku implements INodeType {
             "GET",
             operation === "limits" ? "/account/limits" : "/status",
           );
-        } else if (resource === "bucket") {
+        } else if (resource === "mailbox") {
           if (operation === "create") {
-            const title = this.getNodeParameter("title", i, "") as string;
             const username = this.getNodeParameter(
               "emailUsername",
               i,
               "",
             ) as string;
-            result = await request.call(this, "POST", "/buckets", {
-              bucket: {
-                ...(title ? { title } : {}),
+            result = await request.call(this, "POST", "/mailboxes", {
+              mailbox: {
                 ...(username ? { email: { username } } : {}),
               },
               reason,
             });
           } else if (operation === "getMany") {
-            const data = await request.call(this, "GET", "/buckets");
-            result = data.buckets as IDataObject[];
+            const data = await request.call(this, "GET", "/mailboxes");
+            result = data.mailboxes as IDataObject[];
           } else {
             result = await request.call(
               this,
               "GET",
-              `/buckets/${id("bucketId")}`,
+              `/mailboxes/${id("mailboxId")}`,
               {
                 include_email: this.getNodeParameter(
                   "includeEmail",
@@ -77,9 +75,9 @@ export class Revdoku implements INodeType {
             );
           }
         } else {
-          const bucketPath = `/buckets/${id("bucketId")}`;
+          const mailboxPath = `/mailboxes/${id("mailboxId")}`;
           const collection = resource === "email" ? "emails" : "files";
-          const path = `${bucketPath}/${collection}`;
+          const path = `${mailboxPath}/${collection}`;
           if (operation === "getMany") {
             const returnAll = this.getNodeParameter(
               "returnAll",
@@ -137,7 +135,7 @@ export class Revdoku implements INodeType {
               "POST",
               "/direct_uploads",
               {
-                bucket_id: this.getNodeParameter("bucketId", i) as string,
+                mailbox_id: this.getNodeParameter("mailboxId", i) as string,
                 path: filePath,
                 reason,
                 blob: {
@@ -146,7 +144,7 @@ export class Revdoku implements INodeType {
                   checksum: createHash("md5").update(bytes).digest("base64"),
                   sha256: createHash("sha256").update(bytes).digest("hex"),
                   content_type: contentType,
-                  purpose: "bucket_file",
+                  purpose: "mailbox_file",
                 },
               },
             );
