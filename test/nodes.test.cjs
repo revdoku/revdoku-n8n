@@ -125,11 +125,11 @@ test("account requests use the dedicated host and account query", async () => {
 
 test("create mailbox is minimal, scopes the JSON body and preserves the named result", async () => {
   const { calls, items } = await execute(
-    { resource: "bucket", operation: "create", emailUsername: "invoices" },
+    { resource: "mailbox", operation: "create", emailUsername: "invoices" },
     [
       response(
         {
-          bucket: {
+          mailbox: {
             id: "bkt_1",
             email: { address: "invoices@revdokumail.com" },
           },
@@ -139,10 +139,10 @@ test("create mailbox is minimal, scopes the JSON body and preserves the named re
     ],
   );
   assert.deepEqual(calls[0].body, {
-    bucket: { email: { username: "invoices" } },
+    mailbox: { email: { username: "invoices" } },
     account_id: "acct_client",
   });
-  assert.equal(items[0].json.bucket.id, "bkt_1");
+  assert.equal(items[0].json.mailbox.id, "bkt_1");
 });
 
 test("multiple input items retain pairedItem links", async () => {
@@ -150,7 +150,7 @@ test("multiple input items retain pairedItem links", async () => {
     {
       resource: "email",
       operation: "get",
-      bucketId: "bkt_1",
+      mailboxId: "bkt_1",
       emailId: (index) => `eml_${index}`,
     },
     [
@@ -171,7 +171,7 @@ test("email lists paginate and preserve false filters", async () => {
     {
       resource: "email",
       operation: "getMany",
-      bucketId: "bkt_1",
+      mailboxId: "bkt_1",
       returnAll: true,
       filters: { read: false, has_attachments: false },
     },
@@ -193,7 +193,7 @@ test("email lists paginate and preserve false filters", async () => {
 
 test("file lists retrieve server offsets and obey the requested limit", async () => {
   const { items, calls } = await execute(
-    { resource: "file", operation: "getMany", bucketId: "bkt_1", limit: 3 },
+    { resource: "file", operation: "getMany", mailboxId: "bkt_1", limit: 3 },
     [
       response({
         files: [{ id: "df_1" }, { id: "df_2" }],
@@ -212,8 +212,8 @@ test("file lists retrieve server offsets and obey the requested limit", async ()
 
 test("list results all link to the source item", async () => {
   const { items } = await execute(
-    { resource: "bucket", operation: "getMany" },
-    [response({ buckets: [{ id: "bkt_1" }, { id: "bkt_2" }] })],
+    { resource: "mailbox", operation: "getMany" },
+    [response({ mailboxes: [{ id: "bkt_1" }, { id: "bkt_2" }] })],
   );
   assert.deepEqual(
     items.map((item) => item.pairedItem),
@@ -226,7 +226,7 @@ test("email read update sends false as a JSON boolean", async () => {
     {
       resource: "email",
       operation: "update",
-      bucketId: "bkt_1",
+      mailboxId: "bkt_1",
       emailId: "eml_1",
       read: false,
     },
@@ -239,7 +239,7 @@ test("deletion handles 204 and requires explicit confirmation", async () => {
   const parameters = {
     resource: "email",
     operation: "delete",
-    bucketId: "bkt_1",
+    mailboxId: "bkt_1",
     emailId: "eml_1",
   };
   const fixture = context(parameters);
@@ -259,7 +259,7 @@ test("binary upload uses n8n storage helpers and excludes credentials on the PUT
     {
       resource: "file",
       operation: "upload",
-      bucketId: "bkt_1",
+      mailboxId: "bkt_1",
       path: "docs/note.txt",
       uploadInput: "binary",
       reason: "Archive invoice",
@@ -310,7 +310,7 @@ test("identical upload skips PUT and attach, including zero-byte files", async (
     {
       resource: "file",
       operation: "upload",
-      bucketId: "bkt_1",
+      mailboxId: "bkt_1",
       path: "empty.txt",
       uploadInput: "text",
       text: "",
@@ -327,7 +327,7 @@ test("attachment downloads use fresh temporary URLs and native binary output", a
     {
       resource: "email",
       operation: "downloadAttachment",
-      bucketId: "bkt_1",
+      mailboxId: "bkt_1",
       emailId: "eml_1",
       attachmentId: "df_att",
     },
@@ -359,7 +359,7 @@ test("file download uses the selected file and version IDs, not a potentially re
     {
       resource: "file",
       operation: "download",
-      bucketId: "bkt_1",
+      mailboxId: "bkt_1",
       fileId: "df_1",
     },
     [
@@ -380,7 +380,7 @@ test("file download uses the selected file and version IDs, not a potentially re
   );
   assert.equal(
     calls[1].url,
-    "https://api.revdoku.com/v1/buckets/bkt_1/files/df_1/download",
+    "https://api.revdoku.com/v1/mailboxes/bkt_1/files/df_1/download",
   );
   assert.equal(calls[1].qs.version_id, "dfrev_1");
   assert.equal(calls[1].disableFollowRedirect, true);
@@ -393,7 +393,7 @@ test("unsafe storage URLs are rejected before downloading", async () => {
     {
       resource: "email",
       operation: "downloadOriginal",
-      bucketId: "bkt_1",
+      mailboxId: "bkt_1",
       emailId: "eml_1",
     },
     [
@@ -414,7 +414,7 @@ test("unsafe storage URLs are rejected before downloading", async () => {
 
 for (const statusCode of [401, 403, 404, 429, 503]) {
   test(`HTTP ${statusCode} fails without replaying mutations or returning partial success`, async () => {
-    const fixture = context({ resource: "bucket", operation: "create" }, [
+    const fixture = context({ resource: "mailbox", operation: "create" }, [
       {
         statusCode,
         body: {
@@ -446,7 +446,7 @@ test("continueOnFail reports the failing item and still processes later inputs",
 
 test("manual polling samples without changing persistent state", async () => {
   const fixture = context(
-    { bucketId: "bkt_1" },
+    { mailboxId: "bkt_1" },
     [page([{ id: "eml_sample" }], "sample")],
     { mode: "manual", state: { cursor: "unchanged" } },
   );
@@ -461,13 +461,13 @@ test("manual polling samples without changing persistent state", async () => {
 test("initial poll skips history and resumes using the saved arrival cursor", async () => {
   const state = {};
   const initial = context(
-    { bucketId: "bkt_1", includeExisting: false },
+    { mailboxId: "bkt_1", includeExisting: false },
     [page([{ id: "eml_old" }], "baseline")],
     { state },
   );
   assert.equal(await trigger.poll.call(initial.ctx), null);
   const next = context(
-    { bucketId: "bkt_1", includeExisting: false },
+    { mailboxId: "bkt_1", includeExisting: false },
     [page([{ id: "eml_late", received_at: "2020-01-01T00:00:00Z" }], "next")],
     { state },
   );
@@ -477,7 +477,7 @@ test("initial poll skips history and resumes using the saved arrival cursor", as
 });
 
 test("empty polls retain the new cursor", async () => {
-  const fixture = context({ bucketId: "bkt_1", includeExisting: true }, [
+  const fixture = context({ mailboxId: "bkt_1", includeExisting: true }, [
     page([], "empty"),
   ]);
   assert.equal(await trigger.poll.call(fixture.ctx), null);
@@ -485,11 +485,11 @@ test("empty polls retain the new cursor", async () => {
 });
 
 test("failed later page does not advance the saved cursor", async () => {
-  const initial = context({ bucketId: "bkt_1" }, [page([], "before")]);
+  const initial = context({ mailboxId: "bkt_1" }, [page([], "before")]);
   await trigger.poll.call(initial.ctx);
   const state = initial.state;
   const fixture = context(
-    { bucketId: "bkt_1" },
+    { mailboxId: "bkt_1" },
     [page([{ id: "eml_1" }], "after", true), new Error("timeout")],
     { state },
   );
@@ -497,13 +497,13 @@ test("failed later page does not advance the saved cursor", async () => {
   assert.equal(state.cursor, "before");
 });
 
-for (const change of ["account", "bucket", "key"]) {
+for (const change of ["account", "mailbox", "key"]) {
   test(`changing ${change} resets the cursor scope`, async () => {
-    const initial = context({ bucketId: "bkt_1" }, [page([], "before")]);
+    const initial = context({ mailboxId: "bkt_1" }, [page([], "before")]);
     await trigger.poll.call(initial.ctx);
     const fixture = context(
       {
-        bucketId: change === "bucket" ? "bkt_2" : "bkt_1",
+        mailboxId: change === "mailbox" ? "bkt_2" : "bkt_1",
         includeExisting: false,
       },
       [page([], "new-scope")],
@@ -522,7 +522,7 @@ for (const change of ["account", "bucket", "key"]) {
 
 test("polling caps each run and preserves the backlog cursor", async () => {
   const fixture = context(
-    { bucketId: "bkt_1", includeExisting: true },
+    { mailboxId: "bkt_1", includeExisting: true },
     Array.from({ length: 10 }, (_, i) =>
       page([{ id: `eml_${i}` }], `cursor_${i}`, true),
     ),
@@ -530,7 +530,7 @@ test("polling caps each run and preserves the backlog cursor", async () => {
   assert.equal((await trigger.poll.call(fixture.ctx))[0].length, 10);
   assert.equal(fixture.state.cursor, "cursor_9");
   const next = context(
-    { bucketId: "bkt_1", includeExisting: true },
+    { mailboxId: "bkt_1", includeExisting: true },
     [page([{ id: "eml_10" }], "done")],
     { state: fixture.state },
   );
@@ -539,7 +539,7 @@ test("polling caps each run and preserves the backlog cursor", async () => {
 });
 
 test("repeating cursors fail without saving state", async () => {
-  const fixture = context({ bucketId: "bkt_1", includeExisting: true }, [
+  const fixture = context({ mailboxId: "bkt_1", includeExisting: true }, [
     page([], "same", true),
     page([], "same", true),
   ]);

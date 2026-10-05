@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-revdoku",
   "version": "1.0.0",
-  "description": "Revdoku email inboxes and private file storage for n8n.",
+  "description": "Revdoku email mailboxes and private file storage for n8n.",
   "license": "MIT",
   "author": {
     "name": "Revdoku",

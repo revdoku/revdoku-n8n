@@ -9,7 +9,7 @@ export const properties: INodeProperties[] = [
     default: "email",
     options: [
       { name: "Account", value: "account" },
-      { name: "Bucket", value: "bucket" },
+      { name: "Mailbox", value: "mailbox" },
       { name: "Email", value: "email" },
       { name: "File", value: "file" },
     ],
@@ -32,11 +32,11 @@ export const properties: INodeProperties[] = [
     type: "options",
     noDataExpression: true,
     default: "getMany",
-    displayOptions: { show: { resource: ["bucket"] } },
+    displayOptions: { show: { resource: ["mailbox"] } },
     options: [
-      { name: "Create", value: "create", action: "Create a bucket" },
-      { name: "Get", value: "get", action: "Get a bucket" },
-      { name: "Get Many", value: "getMany", action: "Get many buckets" },
+      { name: "Create", value: "create", action: "Create a mailbox" },
+      { name: "Get", value: "get", action: "Get a mailbox" },
+      { name: "Get Many", value: "getMany", action: "Get many mailboxes" },
     ],
   },
   {
@@ -83,20 +83,20 @@ export const properties: INodeProperties[] = [
     ],
   },
   {
-    displayName: "Bucket ID",
-    name: "bucketId",
+    displayName: "Mailbox ID",
+    name: "mailboxId",
     type: "string",
     default: "",
     required: true,
     displayOptions: { show: { resource: ["email", "file"] } },
   },
   {
-    displayName: "Bucket ID",
-    name: "bucketId",
+    displayName: "Mailbox ID",
+    name: "mailboxId",
     type: "string",
     default: "",
     required: true,
-    displayOptions: { show: { resource: ["bucket"], operation: ["get"] } },
+    displayOptions: { show: { resource: ["mailbox"], operation: ["get"] } },
   },
   {
     displayName: "Email ID",
@@ -138,18 +138,11 @@ export const properties: INodeProperties[] = [
     },
   },
   {
-    displayName: "Title",
-    name: "title",
-    type: "string",
-    default: "",
-    displayOptions: { show: { resource: ["bucket"], operation: ["create"] } },
-  },
-  {
     displayName: "Email Username",
     name: "emailUsername",
     type: "string",
     default: "",
-    displayOptions: { show: { resource: ["bucket"], operation: ["create"] } },
+    displayOptions: { show: { resource: ["mailbox"], operation: ["create"] } },
   },
   {
     displayName: "Include Email Address",
@@ -158,7 +151,7 @@ export const properties: INodeProperties[] = [
     default: false,
     description:
       "Whether to include the receiving address (requires write permission)",
-    displayOptions: { show: { resource: ["bucket"], operation: ["get"] } },
+    displayOptions: { show: { resource: ["mailbox"], operation: ["get"] } },
   },
   {
     displayName: "Return All",

@@ -11,7 +11,7 @@
         300
       ],
       "parameters": {
-        "bucketId": "REPLACE_WITH_SOURCE_BUCKET_ID",
+        "mailboxId": "REPLACE_WITH_SOURCE_MAILBOX_ID",
         "includeExisting": false,
         "pollTimes": {
           "item": [
@@ -34,7 +34,7 @@
       "parameters": {
         "resource": "email",
         "operation": "get",
-        "bucketId": "={{ $('New email').params.bucketId }}",
+        "mailboxId": "={{ $('New email').params.mailboxId }}",
         "emailId": "={{ $json.id }}"
       }
     },
@@ -50,7 +50,7 @@
       "parameters": {
         "resource": "file",
         "operation": "upload",
-        "bucketId": "REPLACE_WITH_DESTINATION_BUCKET_ID",
+        "mailboxId": "REPLACE_WITH_DESTINATION_MAILBOX_ID",
         "uploadInput": "text",
         "text": "={{ JSON.stringify($json.email, null, 2) }}",
         "path": "={{ 'email-json/' + $json.email.id + '.json' }}",
@@ -70,7 +70,7 @@
       "parameters": {
         "resource": "email",
         "operation": "update",
-        "bucketId": "={{ $('New email').params.bucketId }}",
+        "mailboxId": "={{ $('New email').params.mailboxId }}",
         "emailId": "={{ $('New email').item.json.id }}",
         "read": true,
         "reason": "Saved email JSON through the n8n workflow"
